@@ -110,9 +110,9 @@ login_page.click()
 time.sleep(3)
 
 login_email = browser.find_element_by_xpath('//*[@id="email"]')
-login_email.send_keys("shunki.inoue@macromeister.com")
+login_email.send_keys("email")
 login_password = browser.find_element_by_xpath('/html/body/div[6]/div[2]/div/div[1]/div[2]/form/div[1]/table/tbody/tr[2]/td/div/input')
-login_password.send_keys("meisterpass0813")
+login_password.send_keys("password")
 
 time.sleep(5)
 
@@ -120,8 +120,6 @@ login_button = browser.find_element_by_xpath('/html/body/div[6]/div[2]/div/div[1
 login_button.click()
 
 time.sleep(7)
-
-#ここに必要に応じてタグ追加
 
 tokyo_tosin = browser.find_element_by_xpath('//*[@id="area-01"]')
 tokyo_tosin.click()
