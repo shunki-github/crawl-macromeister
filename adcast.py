@@ -12,39 +12,23 @@ import os
 
 def record_to_output(record):
   output = OrderedDict()
-  output["URL"] = record[0]
-  output["所在地"] = record[1]
-  output["土地価格"] = "{}円".format(record[2])
-  output["土地面積(平米)"] = record[3]
-  output["土地面積(坪)"] = record[4]
-  output["道路幅員"] = record[5]
-  output["容積"] = record[6]
-  output["建ぺい率"] = record[7]
-  output["最寄り駅"] = record[8]
-  output["徒歩分数"] = record[9]
-  if kyori:
-    output["距離"] = record[10]
-  else:
-    output["距離"] = ""
-  output["用途地域"] = record[11]
-  output["土地権利"] = record[12]
-  if time_at:
-    output["取得日時"] = record[13]
-  else:
-    output["取得日時"] = ""
-  if sokuryo:
-    output["測量図URL"] = record[14]
-  else:
-    output["測量図URL"] = ""
-  if extra:
-    output["備考"] = record[15]
-  else:
-    output["備考"] = ""
-  if setback:
-    output["セットバック"] = record[16]
-  else:
-    output["セットバック"] = ""
-
+  output["URL"] = record[1]
+  output["所在地"] = record[2]
+  output["土地価格"] = str(record[3])+"円"
+  output["土地面積(平米)"] = record[4]
+  output["土地面積(坪)"] = record[5]
+  output["道路幅員"] = record[6]
+  output["容積"] = record[7]
+  output["建ぺい率"] = record[8]
+  output["最寄り駅"] = record[9]
+  output["徒歩分数"] = record[10]
+  output["距離"] = record[11]
+  output["用途地域"] = record[12]
+  output["土地権利"] = record[13]
+  output["取得日時"] = record[16]
+  output["測量図URL"] = record[15]
+  output["備考"] = record[17]
+  output["セットバック"] = record[18]
   return output
 
 def insert_record(data):
@@ -274,7 +258,16 @@ conn.close()
 #print(type(data["extra"]))
 #print(type(data["setback"]))
 
-insert_record(data)
+conn = sqlite3.connect(db)
+c = conn.cursor()
+search_url = "select * from test where url=?"
+c.execute(search_url, (data["url"],))
+search_url_rs = c.fetchall()
+conn.close()
+if not len(search_url_rs) > 0:
+  insert_record(data)
+else:
+  print("既にあるデータです。")
 
 date_ele = datetime.date.today()
 
@@ -297,6 +290,6 @@ for record in search_result:
 csv_dir = "csv/{}".format(date_ele)
 if not os.path.exists(csv_dir):
   os.makedirs(csv_dir)
-write_csv("{}/adcast_{}".format(csv_dir, date_ele), output_dict)
+write_csv("{}/adcast_{}.csv".format(csv_dir, date_ele), output_dict)
 print("終了です")
 browser.quit()

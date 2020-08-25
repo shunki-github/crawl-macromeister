@@ -12,39 +12,23 @@ import os
 
 def record_to_output(record):
   output = OrderedDict()
-  output["URL"] = record[0]
-  output["所在地"] = record[1]
-  output["土地価格"] = "{}円".format(record[2])
-  output["土地面積(平米)"] = record[3]
-  output["土地面積(坪)"] = record[4]
-  output["道路幅員"] = record[5]
-  output["容積"] = record[6]
-  output["建ぺい率"] = record[7]
-  output["最寄り駅"] = record[8]
-  output["徒歩分数"] = record[9]
-  if data["distance"]:
-    output["距離"] = record[10]
-  else:
-    output["距離"] = ""
-  output["用途地域"] = record[11]
-  output["土地権利"] = record[12]
-  if data["time_at"]:
-    output["取得日時"] = record[13]
-  else:
-    output["取得日時"] = ""
-  if data["land_image_url"]:
-    output["測量図URL"] = record[14]
-  else:
-    output["測量図URL"] = ""
-  if data["extra"]:
-    output["備考"] = record[15]
-  else:
-    output["備考"] = ""
-  if data["setback"]:
-    output["セットバック"] = record[16]
-  else:
-    output["セットバック"] = ""
-
+  output["URL"] = record[1]
+  output["所在地"] = record[2]
+  output["土地価格"] = str(record[3])+"円"
+  output["土地面積(平米)"] = record[4]
+  output["土地面積(坪)"] = record[5]
+  output["道路幅員"] = record[6]
+  output["容積"] = record[7]
+  output["建ぺい率"] = record[8]
+  output["最寄り駅"] = record[9]
+  output["徒歩分数"] = record[10]
+  output["距離"] = record[11]
+  output["用途地域"] = record[12]
+  output["土地権利"] = record[13]
+  output["取得日時"] = record[16]
+  output["測量図URL"] = record[15]
+  output["備考"] = record[17]
+  output["セットバック"] = record[18]
   return output
 
 def insert_record(data):
@@ -110,9 +94,9 @@ login_page.click()
 time.sleep(3)
 
 login_email = browser.find_element_by_xpath('//*[@id="email"]')
-login_email.send_keys("email")
+login_email.send_keys("shunki.inoue@macromeister.com")
 login_password = browser.find_element_by_xpath('/html/body/div[6]/div[2]/div/div[1]/div[2]/form/div[1]/table/tbody/tr[2]/td/div/input')
-login_password.send_keys("password")
+login_password.send_keys("meisterpass0813")
 
 time.sleep(5)
 
@@ -136,7 +120,7 @@ tokyo_north.click()
 tokyo_east.click()
 tokyo_tokka.click()
 
-toti_button = browser.find_element_by_xpath(''//*[@id="form-parts-2-class_3"])
+toti_button = browser.find_element_by_xpath('//*[@id="form-parts-2-class_3"]')
 toti_button.click()
 
 go_button = browser.find_element_by_xpath('/html/body/div[9]/div[3]/div[1]/div[3]/div[2]/button')
@@ -210,7 +194,7 @@ while True:
       if "徒歩" in walk_min_el:
         walk_min = walk_min_el
     distance = None
-    area_of_use = broser.find_element_by_xpath('//th[contains(text(), "用途地域")]/following-sibling::td[1]').text
+    area_of_use = browser.find_element_by_xpath('//th[contains(text(), "用途地域")]/following-sibling::td[1]').text
     ownership = browser.find_element_by_xpath('//th[contains(text(), "土地権利")]/following-sibling::td[1]').text
     time_at = browser.find_element_by_xpath('//th[contains(text(), "情報更新日")]/following-sibling::td[1]').text
     land_image_url = None
@@ -244,7 +228,7 @@ while True:
     browser.get(page)
     #次のページがあれば遷移
   except:
-    print('クロール終了'')
+    print('クロール終了')
     break
 
 db = "openhouse.db"
@@ -299,7 +283,16 @@ conn.close()
 #print(type(data["extra"]))
 #print(type(data["setback"]))
 
-insert_record(data)
+conn = sqlite3.connect(db)
+c = conn.cursor()
+search_url = "select * from test where url=?"
+c.execute(search_url, (data["url"],))
+search_url_rs = c.fetchall()
+conn.close()
+if not len(search_url_rs) > 0:
+  insert_record(data)
+else:
+  print("既にあるデータです。")
 
 date_ele = datetime.date.today()
 
@@ -322,6 +315,6 @@ for record in search_result:
 csv_dir = "csv/{}".format(date_ele)
 if not os.path.exists(csv_dir):
   os.makedirs(csv_dir)
-write_csv("{}/openhouse_{}".format(csv_dir, date_ele), output_dict)
+write_csv("{}/openhouse_{}.csv".format(csv_dir, date_ele), output_dict)
 print("終了です")
 browser.quit()
